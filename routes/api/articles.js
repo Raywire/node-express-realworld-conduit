@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const Article = mongoose.model('Article');
+const Comment = mongoose.model('Comment');
 const User = mongoose.model('User');
 const auth = require('../auth');
 
@@ -15,6 +16,16 @@ router.param('article', function(req, res, next, slug) {
 
       return next();
     }).catch(next);
+});
+
+router.param('comment', function(req, res, next, id) {
+  Comment.findById(id).then(function(comment){
+    if(!comment) { return res.sendStatus(404); }
+
+    req.comment = comment;
+
+    return next();
+  }).catch(next);
 });
 
 router.post('/', auth.required, function(req, res, next) {
@@ -108,6 +119,59 @@ router.delete('/:article/favorite', auth.required, function(req, res, next) {
       });
     });
   }).catch(next);
+});
+
+// return an article's comments
+router.get('/:article/comments', auth.optional, function(req, res, next){
+  Promise.resolve(req.payload ? User.findById(req.payload.id) : null).then(function(user){
+    return req.article.populate({
+      path: 'comments',
+      populate: {
+        path: 'author'
+      },
+      options: {
+        sort: {
+          createdAt: 'desc'
+        }
+      }
+    }).execPopulate().then(function(article) {
+      return res.json({comments: req.article.comments.map(function(comment){
+        return comment.toJSONFor(user);
+      })});
+    });
+  }).catch(next);
+});
+
+// create a new comment
+router.post('/:article/comments', auth.required, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user){
+    if(!user){ return res.sendStatus(401); }
+
+    var comment = new Comment(req.body.comment);
+    comment.article = req.article;
+    comment.author = user;
+
+    return comment.save().then(function(){
+      req.article.comments.push(comment);
+
+      return req.article.save().then(function(article) {
+        res.json({comment: comment.toJSONFor(user)});
+      });
+    });
+  }).catch(next);
+});
+
+router.delete('/:article/comments/:comment', auth.required, function(req, res, next) {
+  if(req.comment.author.toString() === req.payload.id.toString()){
+    req.article.comments.remove(req.comment._id);
+    req.article.save()
+      .then(Comment.find({_id: req.comment._id}).remove().exec())
+      .then(function(){
+        res.sendStatus(204);
+      });
+  } else {
+    res.sendStatus(403);
+  }
 });
 
 module.exports = router;
