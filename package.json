@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "test": "newman run ./tests/api-tests.postman.json -e ./tests/env-api-tests.postman.json"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -25,6 +26,7 @@
     "slug": "^1.1.0"
   },
   "devDependencies": {
+    "newman": "^4.5.4",
     "nodemon": "^1.19.2"
   }
 }
