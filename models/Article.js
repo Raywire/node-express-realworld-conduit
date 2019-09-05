@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const slug = require('slug');
+const uuidv1 = require('uuid/v1');
 const User = mongoose.model('User');
 
 const ArticleSchema = new mongoose.Schema({
@@ -22,7 +23,7 @@ ArticleSchema.pre('validate', function(next){
 });
 
 ArticleSchema.methods.slugify = function() {
-  this.slug = slug(this.title);
+  this.slug = `${slug(this.title)}-${uuidv1()}`;
 };
 
 ArticleSchema.methods.updateFavoriteCount = function() {
