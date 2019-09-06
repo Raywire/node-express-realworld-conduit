@@ -1,6 +1,4 @@
 var express = require('express');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
 var errorhandler = require('errorhandler');
 var mongoose = require('mongoose');
 var logger = require('morgan');
@@ -18,9 +16,6 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-
-app.use(session({ secret: 'conduit', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 if (!isProduction) {
   app.use(errorhandler());
