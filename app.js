@@ -16,33 +16,24 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 
 if (!isProduction) {
   app.use(errorhandler());
 }
 
 if (isTest) {
-  mongoose.connect(process.env.MONGODB_URI_TEST,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+  mongoose.connect(process.env.MONGODB_URI_TEST);
 } 
 
 if (isProduction) {
-  mongoose.connect(process.env.MONGODB_URI,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+  mongoose.connect(process.env.MONGODB_URI);
 }
 
 if (isDevelopment) {
-  mongoose.connect(process.env.MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
+  mongoose.connect(process.env.MONGODB_URI);
   mongoose.set('debug', true);
 }
 
