@@ -194,7 +194,7 @@ router.delete('/:article', auth.required, function(req, res, next) {
     if (!user) { return res.sendStatus(401); }
 
     if(req.article.author._id.toString() === req.payload.id.toString()){
-      return req.article.remove().then(function(){
+      return req.article.deleteOne().then(function(){
         return res.sendStatus(204);
       });
     } else {
@@ -277,7 +277,7 @@ router.delete('/:article/comments/:comment', auth.required, function(req, res, n
   if(req.comment.author.toString() === req.payload.id.toString()){
     req.article.comments.remove(req.comment._id);
     req.article.save()
-      .then(Comment.find({_id: req.comment._id}).remove().exec())
+      .then(Comment.find({_id: req.comment._id}).deleteOne().exec())
       .then(function(){
         res.sendStatus(204);
       });
