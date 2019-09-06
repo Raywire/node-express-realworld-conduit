@@ -10,8 +10,6 @@ require('dotenv').config()
 var isProduction = process.env.NODE_ENV === 'production';
 var isTest = process.env.NODE_ENV === 'test';
 var isDevelopment = process.env.NODE_ENV === 'development';
-console.log(isDevelopment)
-console.log(isTest)
 
 var app = express();
 

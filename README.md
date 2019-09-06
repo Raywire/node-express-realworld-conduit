@@ -2,6 +2,9 @@
 
 # RealWorld API Spec
 
+## Heroku Link
+[You can test the API here](https://node-express-conduit.herokuapp.com)
+
 ## Running API tests locally
 
 To locally run the provided Postman collection against your backend, execute:
