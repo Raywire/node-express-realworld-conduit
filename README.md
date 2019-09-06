@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Raywire/node-express-realworld-conduit.svg?branch=develop)](https://travis-ci.org/Raywire/node-express-realworld-conduit)
+
 # RealWorld API Spec
 
 ## Running API tests locally
