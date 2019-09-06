@@ -10,7 +10,12 @@ router.param('article', function(req, res, next, slug) {
   Article.findOne({ slug: slug})
     .populate('author')
     .then(function (article) {
-      if (!article) { return res.sendStatus(404); }
+      if (!article) {
+        return res.status(404).json({
+        success: false,
+        error: 'Article Not Found'
+        }); 
+      }
 
       req.article = article;
 
@@ -20,7 +25,12 @@ router.param('article', function(req, res, next, slug) {
 
 router.param('comment', function(req, res, next, id) {
   Comment.findById(id).then(function(comment){
-    if(!comment) { return res.sendStatus(404); }
+    if(!comment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Comment Not Found'
+        }); 
+    }
 
     req.comment = comment;
 
