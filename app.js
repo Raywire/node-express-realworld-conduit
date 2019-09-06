@@ -1,13 +1,17 @@
 var express = require('express');
-var path = require('path');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var errorhandler = require('errorhandler');
 var mongoose = require('mongoose');
 var logger = require('morgan');
 var cors = require('cors');
+require('dotenv').config()
 
 var isProduction = process.env.NODE_ENV === 'production';
+var isTest = process.env.NODE_ENV === 'test';
+var isDevelopment = process.env.NODE_ENV === 'development';
+console.log(isDevelopment)
+console.log(isTest)
 
 var app = express();
 
@@ -24,14 +28,24 @@ if (!isProduction) {
   app.use(errorhandler());
 }
 
-if(isProduction){
+if (isTest) {
+  mongoose.connect(process.env.MONGODB_URI_TEST,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+} 
+
+if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-} else {
-  mongoose.connect('mongodb://localhost/conduit',
+}
+
+if (isDevelopment) {
+  mongoose.connect(process.env.MONGODB_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
