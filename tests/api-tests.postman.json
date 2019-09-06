@@ -1591,6 +1591,11 @@
                 "tests['Comment has \"createdAt\" property'] = comment.hasOwnProperty('createdAt');",
                 "tests['\"createdAt\" property is an ISO 8601 timestamp'] = new Date(comment.createdAt).toISOString() === comment.createdAt;",
                 "tests['Comment has \"author\" property'] = comment.hasOwnProperty('author');",
+                "if(tests['Comment has \"id\" property']){",
+                "    postman.setEnvironmentVariable('commentId', comment.id);",
+                "}",
+                "",
+                "tests['Environment variable \"commentId\" has been set'] = environment.commentId === comment.id;",
                 ""
               ]
             }
@@ -1625,7 +1630,7 @@
         {
           "name": "Delete Comment for Article",
           "request": {
-            "url": "{{apiUrl}}/articles/{{slug}}/comments/1",
+            "url": "{{apiUrl}}/articles/{{slug}}/comments/{{commentId}}",
             "method": "DELETE",
             "header": [{
                 "key": "Content-Type",
