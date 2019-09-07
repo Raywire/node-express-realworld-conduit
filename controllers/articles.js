@@ -149,21 +149,9 @@ const getArticle = (req, res, next) => {
 }
 
 const updateArticle = (req, res, next) => {
-  if (typeof req.body.article.title !== 'undefined') {
-    req.article.title = req.body.article.title
-  }
-
-  if (typeof req.body.article.description !== 'undefined') {
-    req.article.description = req.body.article.description
-  }
-
-  if (typeof req.body.article.body !== 'undefined') {
-    req.article.body = req.body.article.body
-  }
-
-  if (typeof req.body.article.tagList !== 'undefined') {
-    req.article.tagList = req.body.article.tagList
-  }
+  Object.keys(req.body.article).map((key) => {
+    req.article[key] = req.body.article[key]
+  })
 
   req.article.save().then(function (article) {
     return res.json({ article: article.toJSONFor(req.user) })
