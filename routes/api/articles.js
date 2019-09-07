@@ -2,6 +2,7 @@ const express = require('express')
 const auth = require('../auth')
 const articlesController = require('../../controllers/articles')
 const checkOwner = require('../../middlewares/checkOwner')
+const getCurrentUser = require('../../middlewares/getCurrentUser')
 
 const articlesRouter = express.Router()
 
@@ -13,22 +14,22 @@ articlesRouter.param('comment', articlesController.preloadComment)
 
 articlesRouter.route('/')
   .get(auth.optional, articlesController.getArticles)
-  .post(auth.required, articlesController.createArticle)
+  .post(auth.required, getCurrentUser, articlesController.createArticle)
 
-articlesRouter.get('/feed', auth.required, articlesController.getFeeds)
+articlesRouter.get('/feed', auth.required, getCurrentUser, articlesController.getFeeds)
 
 articlesRouter.route('/:article')
   .get(auth.optional, articlesController.getArticle)
-  .put(auth.required, checkOwner, articlesController.updateArticle)
-  .delete(auth.required, checkOwner, articlesController.deleteArticle)
+  .put(auth.required, getCurrentUser, checkOwner, articlesController.updateArticle)
+  .delete(auth.required, getCurrentUser, checkOwner, articlesController.deleteArticle)
 
 articlesRouter.route('/:article/favorite')
-  .post(auth.required, articlesController.favoriteArticle)
-  .delete(auth.required, articlesController.unfavoriteArticle)
+  .post(auth.required, getCurrentUser, articlesController.favoriteArticle)
+  .delete(auth.required, getCurrentUser, articlesController.unfavoriteArticle)
 
 articlesRouter.route('/:article/comments')
   .get(auth.optional, articlesController.getArticleComments)
-  .post(auth.required, articlesController.createArticleComment)
+  .post(auth.required, getCurrentUser, articlesController.createArticleComment)
 
 articlesRouter.delete('/:article/comments/:comment', auth.required, articlesController.deleteArticleComment)
 

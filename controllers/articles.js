@@ -8,10 +8,10 @@ const preloadArticle = (req, res, next, slug) => {
     .populate('author')
     .then(function (article) {
       if (!article) {
-        return res.status(404).json({
-          success: false,
-          error: 'Article Not Found'
-        })
+        const err = new Error('Article not found')
+        err.status = 404
+        err.name = 'Not Found'
+        next(err)
       }
 
       req.article = article
@@ -23,10 +23,10 @@ const preloadArticle = (req, res, next, slug) => {
 const preloadComment = (req, res, next, id) => {
   Comment.findById(id).then(function (comment) {
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        error: 'Comment Not Found'
-      })
+      const err = new Error('Comment not found')
+      err.status = 404
+      err.name = 'Not Found'
+      next(err)
     }
 
     req.comment = comment
@@ -96,6 +96,7 @@ const getArticles = (req, res, next) => {
 const getFeeds = (req, res, next) => {
   let limit = 20
   let offset = 0
+  const { user } = req
 
   if (typeof req.query.limit !== 'undefined') {
     limit = req.query.limit
@@ -105,42 +106,35 @@ const getFeeds = (req, res, next) => {
     offset = req.query.offset
   }
 
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
+  Promise.all([
+    Article.find({ author: { $in: user.following } })
+      .limit(Number(limit))
+      .skip(Number(offset))
+      .populate('author')
+      .exec(),
+    Article.countDocuments({ author: { $in: user.following } })
+  ]).then(function (results) {
+    const articles = results[0]
+    const articlesCount = results[1]
 
-    Promise.all([
-      Article.find({ author: { $in: user.following } })
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .populate('author')
-        .exec(),
-      Article.count({ author: { $in: user.following } })
-    ]).then(function (results) {
-      const articles = results[0]
-      const articlesCount = results[1]
-
-      return res.json({
-        articles: articles.map(function (article) {
-          return article.toJSONFor(user)
-        }),
-        articlesCount: articlesCount
-      })
-    }).catch(next)
-  })
+    return res.json({
+      articles: articles.map(function (article) {
+        return article.toJSONFor(user)
+      }),
+      articlesCount: articlesCount
+    })
+  }).catch(next)
 }
 
 const createArticle = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
+  const { user } = req
+  const article = new Article(req.body.article)
 
-    const article = new Article(req.body.article)
+  article.author = user
 
-    article.author = user
-
-    return article.save().then(function () {
-      return res.json({ article: article.toJSONFor(user) })
-    })
-  }).catch(next)
+  return article.save().then(function () {
+    return res.json({ article: article.toJSONFor(user) })
+  })
 }
 
 const getArticle = (req, res, next) => {
@@ -155,64 +149,51 @@ const getArticle = (req, res, next) => {
 }
 
 const updateArticle = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (typeof req.body.article.title !== 'undefined') {
-      req.article.title = req.body.article.title
-    }
+  if (typeof req.body.article.title !== 'undefined') {
+    req.article.title = req.body.article.title
+  }
 
-    if (typeof req.body.article.description !== 'undefined') {
-      req.article.description = req.body.article.description
-    }
+  if (typeof req.body.article.description !== 'undefined') {
+    req.article.description = req.body.article.description
+  }
 
-    if (typeof req.body.article.body !== 'undefined') {
-      req.article.body = req.body.article.body
-    }
+  if (typeof req.body.article.body !== 'undefined') {
+    req.article.body = req.body.article.body
+  }
 
-    if (typeof req.body.article.tagList !== 'undefined') {
-      req.article.tagList = req.body.article.tagList
-    }
+  if (typeof req.body.article.tagList !== 'undefined') {
+    req.article.tagList = req.body.article.tagList
+  }
 
-    req.article.save().then(function (article) {
-      return res.json({ article: article.toJSONFor(user) })
-    }).catch(next)
-  })
+  req.article.save().then(function (article) {
+    return res.json({ article: article.toJSONFor(req.user) })
+  }).catch(next)
 }
 
 const deleteArticle = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-    return req.article.deleteOne().then(function () {
-      return res.sendStatus(204)
-    })
-  }).catch(next)
+  return req.article.deleteOne().then(function () {
+    return res.sendStatus(204)
+  })
 }
 
 const favoriteArticle = (req, res, next) => {
   const articleId = req.article._id
-
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.favorite(articleId).then(function () {
-      return req.article.updateFavoriteCount().then(function (article) {
-        return res.json({ article: article.toJSONFor(user) })
-      })
+  const { user } = req
+  return user.favorite(articleId).then(function () {
+    return req.article.updateFavoriteCount().then(function (article) {
+      return res.json({ article: article.toJSONFor(user) })
     })
-  }).catch(next)
+  })
 }
 
 const unfavoriteArticle = (req, res, next) => {
   const articleId = req.article._id
-
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.unfavorite(articleId).then(function () {
-      return req.article.updateFavoriteCount().then(function (article) {
-        return res.json({ article: article.toJSONFor(user) })
-      })
+  const { user } = req
+  return user.unfavorite(articleId).then(function () {
+    return req.article.updateFavoriteCount().then(function (article) {
+      return res.json({ article: article.toJSONFor(user) })
     })
-  }).catch(next)
+  })
 }
 
 const getArticleComments = (req, res, next) => {
@@ -238,21 +219,18 @@ const getArticleComments = (req, res, next) => {
 }
 
 const createArticleComment = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
+  const { user } = req
+  const comment = new Comment(req.body.comment)
+  comment.article = req.article
+  comment.author = user
 
-    const comment = new Comment(req.body.comment)
-    comment.article = req.article
-    comment.author = user
+  return comment.save().then(function () {
+    req.article.comments.push(comment)
 
-    return comment.save().then(function () {
-      req.article.comments.push(comment)
-
-      return req.article.save().then(function (article) {
-        res.json({ comment: comment.toJSONFor(user) })
-      })
+    return req.article.save().then(function (article) {
+      res.json({ comment: comment.toJSONFor(user) })
     })
-  }).catch(next)
+  })
 }
 
 const deleteArticleComment = (req, res, next) => {
