@@ -1899,6 +1899,34 @@
           "description": ""
         },
         "response": []
+      },{
+        "name": "Delete User",
+        "request": {
+          "url": "{{apiUrl}}/user/johnjacob",
+          "method": "DELETE",
+          "header": [{
+              "key": "Content-Type",
+              "value": "application/json",
+              "description": ""
+            },
+            {
+              "key": "X-Requested-With",
+              "value": "XMLHttpRequest",
+              "description": ""
+            },
+            {
+              "key": "Authorization",
+              "value": "Token {{token}}",
+              "description": ""
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "description": ""
+        },
+        "response": []
       }]
     }
   ]

@@ -4,6 +4,21 @@ const passport = require('passport')
 const User = mongoose.model('User')
 const auth = require('../auth')
 
+// Preload user object on routes with ':user'
+router.param('user', function (req, res, next, username) {
+  User.findOne({ username: username })
+    .then(function (user) {
+      if (!user) {
+        const err = new Error('User not found')
+        err.status = 404
+        err.name = 'Not Found'
+        next(err)
+      }
+      req.user = user
+      return next()
+    }).catch(next)
+})
+
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401) }
@@ -70,6 +85,19 @@ router.post('/users', function (req, res, next) {
   user.save().then(function () {
     return res.json({ user: user.toAuthJSON() })
   }).catch(next)
+})
+
+router.delete('/user/:user', auth.required, function (req, res, next) {
+  if (req.user.admin === true || req.user.username === req.payload.username) {
+    return req.user.deleteOne().then(function () {
+      return res.sendStatus(204)
+    })
+  } else {
+    const err = new Error('Only an admin can delete another user')
+    err.status = 403
+    err.name = 'Forbidden'
+    next(err)
+  }
 })
 
 module.exports = router

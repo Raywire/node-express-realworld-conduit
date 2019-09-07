@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   image: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  admin: { type: Boolean, default: false },
   hash: String,
   salt: String
 }, { timestamps: true })
@@ -45,6 +46,7 @@ UserSchema.methods.toAuthJSON = function () {
     email: this.email,
     bio: this.bio,
     image: this.image,
+    admin: this.admin,
     token: this.generateJWT()
   }
 }
@@ -54,6 +56,7 @@ UserSchema.methods.toProfileJSONFor = function (user) {
     username: this.username,
     bio: this.bio,
     image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
+    admin: this.admin,
     following: user ? user.isFollowing(this._id) : false
   }
 }
