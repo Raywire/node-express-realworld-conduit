@@ -5,7 +5,7 @@ const User = mongoose.model('User')
 
 const preloadArticle = (req, res, next, slug) => {
   Article.findOne({ slug: slug })
-    .populate('author')
+    .populate('author', '-hash')
     .then(function (article) {
       if (!article) {
         const err = new Error('Article not found')
