@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
-    "test": "NODE_ENV=test newman run ./tests/api-tests.postman.json -e ./tests/env-api-tests.postman.json"
+    "test": "NODE_ENV=test newman run ./tests/api-tests.postman.json -e ./tests/env-api-tests.postman.json",
+    "lint": "eslint"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -25,6 +26,12 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "eslint": "^6.3.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "newman": "^4.5.4",
     "nodemon": "^1.19.2"
   }
