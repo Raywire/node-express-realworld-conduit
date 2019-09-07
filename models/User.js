@@ -17,13 +17,26 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' })
 
-UserSchema.methods.validPassword = async function (password) {
-  const match = await bcrypt.compare(password, this.hash)
-  return match
-}
+UserSchema.pre('save', function (next) {
+  const user = this
 
-UserSchema.methods.setPassword = async function (password) {
-  this.hash = await bcrypt.hash(password, 10)
+  // only hash the password if it has been modified (or is new)
+  if (!user.isModified('hash')) return next()
+
+  bcrypt.hash(user.hash, 10, function (err, hash) {
+    if (err) return next(err)
+
+    // override the cleartext password with the hashed one
+    user.hash = hash
+    next()
+  })
+})
+
+UserSchema.methods.comparePassword = function (password, cb) {
+  bcrypt.compare(password, this.hash, function (err, isMatch) {
+    if (err) return cb(err)
+    cb(null, isMatch)
+  })
 }
 
 UserSchema.methods.generateJWT = function () {

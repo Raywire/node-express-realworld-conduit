@@ -17,7 +17,7 @@ const updateUser = (req, res, next) => {
     // only update fields that were actually passed...
     Object.keys(req.body.user).map((key) => {
       if (key === 'password') {
-        user.setPassword(req.body.user.password)
+        user.hash = req.body.user.password
       }
       user[key] = req.body.user[key]
     })
@@ -54,7 +54,7 @@ const signup = (req, res, next) => {
 
   user.username = req.body.user.username
   user.email = req.body.user.email
-  user.setPassword(req.body.user.password)
+  user.hash = req.body.user.password
 
   user.save().then(function () {
     return res.json({ user: user.toAuthJSON() })

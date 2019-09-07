@@ -8,10 +8,15 @@ passport.use(new LocalStrategy({
   passwordField: 'user[password]'
 }, function (email, password, done) {
   User.findOne({ email: email }).then(function (user) {
-    if (!user || !user.validPassword(password)) {
-      return done(null, false, { errors: { 'email or password': 'is invalid' } })
+    if (!user) {
+      return done(null, false, { errors: { email: 'is invalid' } })
     }
-
-    return done(null, user)
+    user.comparePassword(password, function (err, isMatch) {
+      if (err) throw err
+      if (isMatch) {
+        return done(null, user)
+      }
+      return done(null, false, { errors: { password: 'is invalid' } })
+    })
   }).catch(done)
 }))
