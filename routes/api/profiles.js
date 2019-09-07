@@ -1,58 +1,17 @@
-const router = require('express').Router()
-const mongoose = require('mongoose')
-const User = mongoose.model('User')
+const express = require('express')
 const auth = require('../auth')
+const profilesController = require('../../controllers/profiles')
+
+const profileRouter = express.Router()
 
 // Preload user objects on routes with ':username'
-router.param('username', function (req, res, next, username) {
-  User.findOne({ username: username }).then(function (user) {
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'User Not Found'
-      })
-    }
+profileRouter.param('username', profilesController.preloadUser)
 
-    req.profile = user
+profileRouter.route('/:username')
+  .get(auth.optional, profilesController.getUserProfile)
 
-    return next()
-  }).catch(next)
-})
+profileRouter.route('/:username/follow')
+  .post(auth.required, profilesController.followUser)
+  .delete(auth.required, profilesController.unfollowUser)
 
-router.get('/:username', auth.optional, function (req, res, next) {
-  if (req.payload) {
-    User.findById(req.payload.id).then(function (user) {
-      if (!user) { return res.json({ profile: req.profile.toProfileJSONFor(false) }) }
-
-      return res.json({ profile: req.profile.toProfileJSONFor(user) })
-    })
-  } else {
-    return res.json({ profile: req.profile.toProfileJSONFor(false) })
-  }
-})
-
-router.post('/:username/follow', auth.required, function (req, res, next) {
-  const profileId = req.profile._id
-
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.follow(profileId).then(function () {
-      return res.json({ profile: req.profile.toProfileJSONFor(user) })
-    })
-  }).catch(next)
-})
-
-router.delete('/:username/follow', auth.required, function (req, res, next) {
-  const profileId = req.profile._id
-
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.unfollow(profileId).then(function () {
-      return res.json({ profile: req.profile.toProfileJSONFor(user) })
-    })
-  }).catch(next)
-})
-
-module.exports = router
+module.exports = profileRouter
