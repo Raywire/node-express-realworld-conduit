@@ -156,43 +156,34 @@ const getArticle = (req, res, next) => {
 
 const updateArticle = (req, res, next) => {
   User.findById(req.payload.id).then(function (user) {
-    if (req.article.author._id.toString() === req.payload.id.toString()) {
-      if (typeof req.body.article.title !== 'undefined') {
-        req.article.title = req.body.article.title
-      }
-
-      if (typeof req.body.article.description !== 'undefined') {
-        req.article.description = req.body.article.description
-      }
-
-      if (typeof req.body.article.body !== 'undefined') {
-        req.article.body = req.body.article.body
-      }
-
-      if (typeof req.body.article.tagList !== 'undefined') {
-        req.article.tagList = req.body.article.tagList
-      }
-
-      req.article.save().then(function (article) {
-        return res.json({ article: article.toJSONFor(user) })
-      }).catch(next)
-    } else {
-      return res.sendStatus(403)
+    if (typeof req.body.article.title !== 'undefined') {
+      req.article.title = req.body.article.title
     }
+
+    if (typeof req.body.article.description !== 'undefined') {
+      req.article.description = req.body.article.description
+    }
+
+    if (typeof req.body.article.body !== 'undefined') {
+      req.article.body = req.body.article.body
+    }
+
+    if (typeof req.body.article.tagList !== 'undefined') {
+      req.article.tagList = req.body.article.tagList
+    }
+
+    req.article.save().then(function (article) {
+      return res.json({ article: article.toJSONFor(user) })
+    }).catch(next)
   })
 }
 
 const deleteArticle = (req, res, next) => {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401) }
-
-    if (req.article.author._id.toString() === req.payload.id.toString()) {
-      return req.article.deleteOne().then(function () {
-        return res.sendStatus(204)
-      })
-    } else {
-      return res.sendStatus(403)
-    }
+    return req.article.deleteOne().then(function () {
+      return res.sendStatus(204)
+    })
   }).catch(next)
 }
 

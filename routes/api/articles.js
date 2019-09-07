@@ -1,6 +1,7 @@
 const express = require('express')
 const auth = require('../auth')
 const articlesController = require('../../controllers/articles')
+const checkOwner = require('../../middlewares/checkOwner')
 
 const articlesRouter = express.Router()
 
@@ -18,8 +19,8 @@ articlesRouter.get('/feed', auth.required, articlesController.getFeeds)
 
 articlesRouter.route('/:article')
   .get(auth.optional, articlesController.getArticle)
-  .put(auth.required, articlesController.updateArticle)
-  .delete(auth.required, articlesController.deleteArticle)
+  .put(auth.required, checkOwner, articlesController.updateArticle)
+  .delete(auth.required, checkOwner, articlesController.deleteArticle)
 
 articlesRouter.route('/:article/favorite')
   .post(auth.required, articlesController.favoriteArticle)
