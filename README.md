@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/Raywire/node-express-realworld-conduit.svg?branch=develop)](https://travis-ci.org/Raywire/node-express-realworld-conduit)
+[![Maintainability](https://api.codeclimate.com/v1/badges/5a982d75479c9fca0922/maintainability)](https://codeclimate.com/github/Raywire/node-express-realworld-conduit/maintainability)
 
 # RealWorld API Spec
 
