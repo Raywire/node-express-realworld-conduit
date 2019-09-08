@@ -5,6 +5,7 @@ const logger = require('morgan')
 const cors = require('cors')
 require('dotenv').config()
 const swaggerUi = require('swagger-ui-express')
+const helmet = require('helmet')
 const swaggerDocument = require('./swagger.json')
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -13,6 +14,7 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 
 const app = express()
 
+app.use(helmet())
 app.use(cors())
 
 app.use(logger('dev'))
