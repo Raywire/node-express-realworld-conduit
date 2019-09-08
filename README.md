@@ -6,6 +6,9 @@
 ## Heroku Link
 [You can test the API here](https://node-express-conduit.herokuapp.com)
 
+## Google Cloud Platform
+[You can test the API here](https://node-express-conduit.appspot.com)
+
 ## Running API tests locally
 
 To locally run the provided Postman collection against your backend, execute:
