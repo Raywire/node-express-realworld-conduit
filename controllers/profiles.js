@@ -16,7 +16,7 @@ const preloadUser = (req, res, next, username) => {
   }).catch(next)
 }
 
-const getUserProfile = (req, res, next) => {
+const getUserProfile = (req, res) => {
   if (req.payload) {
     User.findById(req.payload.id).then(function (user) {
       if (!user) { return res.json({ profile: req.profile.toProfileJSONFor(false) }) }
@@ -28,28 +28,24 @@ const getUserProfile = (req, res, next) => {
   }
 }
 
-const followUser = (req, res, next) => {
+const followUser = (req, res) => {
   const profileId = req.profile._id
+  const { profile } = req
 
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.follow(profileId).then(function () {
-      return res.json({ profile: req.profile.toProfileJSONFor(user) })
+  return req.user.follow(profileId).then(function () {
+    return res.json({
+      profile: profile.toProfileJSONFor(req.user)
     })
-  }).catch(next)
+  })
 }
 
-const unfollowUser = (req, res, next) => {
+const unfollowUser = (req, res) => {
   const profileId = req.profile._id
+  const { user } = req
 
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return user.unfollow(profileId).then(function () {
-      return res.json({ profile: req.profile.toProfileJSONFor(user) })
-    })
-  }).catch(next)
+  return user.unfollow(profileId).then(function () {
+    return res.json({ profile: req.profile.toProfileJSONFor(user) })
+  })
 }
 
 module.exports = {
