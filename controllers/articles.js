@@ -6,7 +6,7 @@ const User = mongoose.model('User')
 const preloadArticle = (req, res, next, slug) => {
   Article.findOne({ slug: slug })
     .populate('author', '-hash')
-    .then(function (article) {
+    .then((article) => {
       if (!article) {
         const err = new Error('Article not found')
         err.status = 404
@@ -21,32 +21,24 @@ const preloadArticle = (req, res, next, slug) => {
 }
 
 const preloadComment = (req, res, next, id) => {
-  Comment.findById(id).then(function (comment) {
-    if (!comment) {
-      const err = new Error('Comment not found')
-      err.status = 404
-      err.name = 'Not Found'
-      next(err)
-    }
+  Comment.findById(id)
+    .then((comment) => {
+      if (!comment) {
+        const err = new Error('Comment not found')
+        err.status = 404
+        err.name = 'Not Found'
+        next(err)
+      }
 
-    req.comment = comment
+      req.comment = comment
 
-    return next()
-  }).catch(next)
+      return next()
+    }).catch(next)
 }
 
 const getArticles = (req, res, next) => {
   const query = {}
-  let limit = 20
-  let offset = 0
-
-  if (typeof req.query.limit !== 'undefined') {
-    limit = req.query.limit
-  }
-
-  if (typeof req.query.offset !== 'undefined') {
-    offset = req.query.offset
-  }
+  const { limit, offset, page } = req.query
 
   if (typeof req.query.tag !== 'undefined') {
     query.tagList = { $in: [req.query.tag] }
@@ -56,8 +48,7 @@ const getArticles = (req, res, next) => {
     req.query.author ? User.findOne({ username: req.query.author }) : null,
     req.query.favorited ? User.findOne({ username: req.query.favorited }) : null
   ]).then(function (results) {
-    const author = results[0]
-    const favoriter = results[1]
+    const [author, favoriter] = results
 
     if (author) {
       query.author = author._id
@@ -74,59 +65,49 @@ const getArticles = (req, res, next) => {
         .limit(Number(limit))
         .skip(Number(offset))
         .sort({ createdAt: 'desc' })
-        .populate('author')
+        .populate('author', '-hash')
         .exec(),
       Article.countDocuments(query).exec(),
       req.payload ? User.findById(req.payload.id) : null
-    ]).then(function (results) {
-      const articles = results[0]
-      const articlesCount = results[1]
-      const user = results[2]
+    ]).then((results) => {
+      const [articles, articlesCount, user] = results
 
       return res.json({
-        articles: articles.map(function (article) {
+        articles: articles.map((article) => {
           return article.toJSONFor(user)
         }),
-        articlesCount: articlesCount
+        articlesCount: articlesCount,
+        page
       })
     })
   }).catch(next)
 }
 
 const getFeeds = (req, res, next) => {
-  let limit = 20
-  let offset = 0
+  const { limit, offset, page } = req.query
   const { user } = req
-
-  if (typeof req.query.limit !== 'undefined') {
-    limit = req.query.limit
-  }
-
-  if (typeof req.query.offset !== 'undefined') {
-    offset = req.query.offset
-  }
 
   Promise.all([
     Article.find({ author: { $in: user.following } })
       .limit(Number(limit))
       .skip(Number(offset))
-      .populate('author')
+      .populate('author', '-hash')
       .exec(),
     Article.countDocuments({ author: { $in: user.following } })
-  ]).then(function (results) {
-    const articles = results[0]
-    const articlesCount = results[1]
+  ]).then((results) => {
+    const [articles, articlesCount] = results
 
     return res.json({
       articles: articles.map(function (article) {
         return article.toJSONFor(user)
       }),
-      articlesCount: articlesCount
+      articlesCount,
+      page
     })
   }).catch(next)
 }
 
-const createArticle = (req, res, next) => {
+const createArticle = (req, res) => {
   const { user } = req
   const article = new Article(req.body.article)
 
@@ -140,7 +121,7 @@ const createArticle = (req, res, next) => {
 const getArticle = (req, res, next) => {
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
-    req.article.populate('author').execPopulate()
+    req.article.populate('author', '-hash').execPopulate()
   ]).then(function (results) {
     const user = results[0]
 
@@ -158,13 +139,13 @@ const updateArticle = (req, res, next) => {
   }).catch(next)
 }
 
-const deleteArticle = (req, res, next) => {
+const deleteArticle = (req, res) => {
   return req.article.deleteOne().then(function () {
     return res.sendStatus(204)
   })
 }
 
-const favoriteArticle = (req, res, next) => {
+const favoriteArticle = (req, res) => {
   const articleId = req.article._id
   const { user } = req
   return user.favorite(articleId).then(function () {
@@ -174,11 +155,11 @@ const favoriteArticle = (req, res, next) => {
   })
 }
 
-const unfavoriteArticle = (req, res, next) => {
+const unfavoriteArticle = (req, res) => {
   const articleId = req.article._id
-  const { user } = req
+  const { article, user } = req
   return user.unfavorite(articleId).then(function () {
-    return req.article.updateFavoriteCount().then(function (article) {
+    return article.updateFavoriteCount().then(function (article) {
       return res.json({ article: article.toJSONFor(user) })
     })
   })
@@ -189,7 +170,8 @@ const getArticleComments = (req, res, next) => {
     return req.article.populate({
       path: 'comments',
       populate: {
-        path: 'author'
+        path: 'author',
+        select: '-hash'
       },
       options: {
         sort: {
@@ -206,7 +188,7 @@ const getArticleComments = (req, res, next) => {
   }).catch(next)
 }
 
-const createArticleComment = (req, res, next) => {
+const createArticleComment = (req, res) => {
   const { user } = req
   const comment = new Comment(req.body.comment)
   comment.article = req.article
@@ -221,7 +203,7 @@ const createArticleComment = (req, res, next) => {
   })
 }
 
-const deleteArticleComment = (req, res, next) => {
+const deleteArticleComment = (req, res) => {
   if (req.comment.author.toString() === req.payload.id.toString()) {
     req.article.comments.remove(req.comment._id)
     req.article.save()

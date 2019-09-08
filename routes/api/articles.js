@@ -3,6 +3,7 @@ const auth = require('../auth')
 const articlesController = require('../../controllers/articles')
 const checkOwner = require('../../middlewares/checkOwner')
 const getCurrentUser = require('../../middlewares/getCurrentUser')
+const paginate = require('../../middlewares/paginate')
 
 const articlesRouter = express.Router()
 
@@ -13,10 +14,10 @@ articlesRouter.param('article', articlesController.preloadArticle)
 articlesRouter.param('comment', articlesController.preloadComment)
 
 articlesRouter.route('/')
-  .get(auth.optional, articlesController.getArticles)
+  .get(auth.optional, paginate, articlesController.getArticles)
   .post(auth.required, getCurrentUser, articlesController.createArticle)
 
-articlesRouter.get('/feed', auth.required, getCurrentUser, articlesController.getFeeds)
+articlesRouter.get('/feed', auth.required, getCurrentUser, paginate, articlesController.getFeeds)
 
 articlesRouter.route('/:article')
   .get(auth.optional, articlesController.getArticle)
