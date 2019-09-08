@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const logger = require('morgan')
 const cors = require('cors')
 require('dotenv').config()
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./swagger.json')
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
@@ -43,6 +45,7 @@ require('./models/Comment')
 require('./config/passport')
 
 app.use(require('./routes'))
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
