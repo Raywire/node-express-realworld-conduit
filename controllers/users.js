@@ -3,39 +3,34 @@ const passport = require('passport')
 const User = mongoose.model('User')
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
-
-    return res.json({ user: user.toAuthJSON() })
-  }).catch(next)
+  return res.json({ user: req.user.toAuthJSON() })
 }
 
 const updateUser = (req, res, next) => {
-  User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401) }
+  const { user } = req
+  // only update fields that were actually passed...
+  Object.keys(req.body.user).map((key) => {
+    if (key === 'password') {
+      user.hash = req.body.user.password
+    }
+    user[key] = req.body.user[key]
+  })
 
-    // only update fields that were actually passed...
-    Object.keys(req.body.user).map((key) => {
-      if (key === 'password') {
-        user.hash = req.body.user.password
-      }
-      user[key] = req.body.user[key]
-    })
-
-    return user.save().then(function () {
-      return res.json({ user: user.toAuthJSON() })
-    })
-  }).catch(next)
+  return user.save().then(function () {
+    return res.json({ user: user.toAuthJSON() })
+  })
 }
 
 const login = (req, res, next) => {
-  if (!req.body.user.email) {
-    return res.status(422).json({ errors: { email: "can't be blank" } })
-  }
-
-  if (!req.body.user.password) {
-    return res.status(422).json({ errors: { password: "can't be blank" } })
-  }
+  Object.keys(req.body.user).map((key) => {
+    if (key !== 'email' && key !== 'password') {
+      return res.status(422).json({
+        errors: {
+          message: 'email and password are required'
+        }
+      })
+    }
+  })
 
   passport.authenticate('local', { session: false }, function (err, user, info) {
     if (err) { return next(err) }
@@ -74,18 +69,18 @@ const deleteUser = (req, res, next) => {
   }
 }
 
-const preloadUser = (req, res, next, username) => {
-  User.findOne({ username: username })
-    .then(function (user) {
-      if (!user) {
-        const err = new Error('User not found')
-        err.status = 404
-        err.name = 'Not Found'
-        next(err)
-      }
-      req.user = user
-      return next()
-    }).catch(next)
+const preloadUser = async (req, res, next, username) => {
+  const user = await User.findOne({ username: username })
+
+  if (!user) {
+    const err = new Error('User not found')
+    err.status = 404
+    err.name = 'Not Found'
+    next(err)
+  }
+
+  req.user = user
+  return next()
 }
 
 module.exports = {

@@ -1,6 +1,7 @@
 const express = require('express')
 const auth = require('../auth')
 const usersController = require('../../controllers/users')
+const getCurrentUser = require('../../middlewares/getCurrentUser')
 
 const userRouter = express.Router()
 
@@ -8,8 +9,8 @@ const userRouter = express.Router()
 userRouter.param('user', usersController.preloadUser)
 
 userRouter.route('/user')
-  .get(auth.required, usersController.getCurrentUser)
-  .put(auth.required, usersController.updateUser)
+  .get(auth.required, getCurrentUser, usersController.getCurrentUser)
+  .put(auth.required, getCurrentUser, usersController.updateUser)
 
 userRouter.post('/users/login', usersController.login)
 
