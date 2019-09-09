@@ -6,8 +6,11 @@
 ## Heroku Link
 [You can test the API here](https://node-express-conduit.herokuapp.com)
 
-## Google Cloud Platform
+## Google Cloud Platform Link
 [You can test the API here](https://node-express-conduit.appspot.com)
+
+## Microsoft Azure Link
+[You can test the API here](https://node-express-conduit.azurewebsites.net)
 
 ## Running API tests locally
 
