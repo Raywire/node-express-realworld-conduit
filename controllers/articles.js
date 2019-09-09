@@ -11,7 +11,7 @@ const preloadArticle = (req, res, next, slug) => {
         const err = new Error('Article not found')
         err.status = 404
         err.name = 'Not Found'
-        next(err)
+        return next(err)
       }
 
       req.article = article
@@ -27,7 +27,7 @@ const preloadComment = (req, res, next, id) => {
         const err = new Error('Comment not found')
         err.status = 404
         err.name = 'Not Found'
-        next(err)
+        return next(err)
       }
 
       req.comment = comment

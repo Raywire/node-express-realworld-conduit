@@ -36,7 +36,6 @@ const login = (req, res, next) => {
     if (err) { return next(err) }
 
     if (user) {
-      user.token = user.generateJWT()
       return res.json({ user: user.toAuthJSON() })
     } else {
       return res.status(422).json(info)
@@ -65,7 +64,7 @@ const deleteUser = (req, res, next) => {
     const err = new Error('Only an admin can delete another user')
     err.status = 403
     err.name = 'Forbidden'
-    next(err)
+    return next(err)
   }
 }
 
@@ -76,7 +75,7 @@ const preloadUser = async (req, res, next, username) => {
     const err = new Error('User not found')
     err.status = 404
     err.name = 'Not Found'
-    next(err)
+    return next(err)
   }
 
   req.user = user
