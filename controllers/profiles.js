@@ -32,7 +32,7 @@ const followUser = (req, res) => {
   const profileId = req.profile._id
   const { profile } = req
 
-  return req.user.follow(profileId).then(function () {
+  return req.user.performAction(profileId, 'following').then(function () {
     return res.json({
       profile: profile.toProfileJSONFor(req.user)
     })
@@ -43,7 +43,7 @@ const unfollowUser = (req, res) => {
   const profileId = req.profile._id
   const { user } = req
 
-  return user.unfollow(profileId).then(function () {
+  return user.undoAction(profileId, 'following').then(function () {
     return res.json({ profile: req.profile.toProfileJSONFor(user) })
   })
 }

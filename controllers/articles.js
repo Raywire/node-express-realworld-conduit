@@ -148,7 +148,7 @@ const deleteArticle = (req, res) => {
 const favoriteArticle = (req, res) => {
   const articleId = req.article._id
   const { user } = req
-  return user.favorite(articleId).then(function () {
+  return user.performAction(articleId, 'favorites').then(function () {
     return req.article.updateFavoriteCount().then(function (article) {
       return res.json({ article: article.toJSONFor(user) })
     })
@@ -158,7 +158,7 @@ const favoriteArticle = (req, res) => {
 const unfavoriteArticle = (req, res) => {
   const articleId = req.article._id
   const { article, user } = req
-  return user.unfavorite(articleId).then(function () {
+  return user.undoAction(articleId, 'favorites').then(function () {
     return article.updateFavoriteCount().then(function (article) {
       return res.json({ article: article.toJSONFor(user) })
     })
