@@ -2,16 +2,14 @@ const mongoose = require('mongoose')
 const Article = mongoose.model('Article')
 const Comment = mongoose.model('Comment')
 const User = mongoose.model('User')
+const throw404Error = require('../utils/errorHandlers')
 
 const preloadArticle = (req, res, next, slug) => {
   Article.findOne({ slug: slug })
     .populate('author', '-hash')
     .then((article) => {
       if (!article) {
-        const err = new Error('Article not found')
-        err.status = 404
-        err.name = 'Not Found'
-        return next(err)
+        return next(throw404Error('Article'))
       }
 
       req.article = article
@@ -24,10 +22,7 @@ const preloadComment = (req, res, next, id) => {
   Comment.findById(id)
     .then((comment) => {
       if (!comment) {
-        const err = new Error('Comment not found')
-        err.status = 404
-        err.name = 'Not Found'
-        return next(err)
+        return next(throw404Error('Comment'))
       }
 
       req.comment = comment
