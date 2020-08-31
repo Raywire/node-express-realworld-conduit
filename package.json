@@ -10,7 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^8.1.0",
