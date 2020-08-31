@@ -7,9 +7,7 @@ steps:
     - "MONGODB_URI=${_MONGODB_URI}"
     - "MONGODB_URI_TEST=${_MONGODB_URI_TEST}"
     - "NODE_ENV=${_NODE_ENV}"
-    - "SECRET_KEY=${_SECRET_KEY}"
-- name: "gcr.io/cloud-builders/npm"
-  args: ["test"]
+    - "SECRET=${_SECRET}"
 - name: 'gcr.io/cloud-builders/gcloud'
   args: ['app', 'deploy']
   timeout: '600s'
