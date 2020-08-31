@@ -1,6 +1,13 @@
 steps:
 - name: 'gcr.io/cloud-builders/npm'
   args: ['install']
+- name: "gcr.io/cloud-builders/npm"
+  args: ["run", "create-env"]
+  env:
+    - "MONGODB_URI=${_MONGODB_URI}"
+    - "MONGODB_URI_TEST=${_MONGODB_URI_TEST}"
+    - "NODE_ENV=${_NODE_ENV}"
+    - "SECRET=${_SECRET}"
 - name: 'gcr.io/cloud-builders/gcloud'
   args: ['app', 'deploy']
   timeout: '600s'
