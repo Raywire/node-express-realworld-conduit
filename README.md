@@ -9,12 +9,6 @@
 ## Google Cloud Platform Link
 [You can test the API here](https://node-express-conduit.appspot.com)
 
-## Microsoft Azure Link
-[You can test the API here](https://node-express-conduit.azurewebsites.net)
-
-## AWS Link
-[You can test the API here](http://ec2-3-16-152-56.us-east-2.compute.amazonaws.com/)
-
 ## Running API tests locally
 
 To locally run the provided Postman collection against your backend, execute:
