@@ -1,3 +1,6 @@
 runtime: nodejs10
+automatic_scaling:
+  target_cpu_utilization: 0.95
+  max_instances: 3
 env_variables:
   NODE_ENV: "production"
