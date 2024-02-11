@@ -3,9 +3,6 @@
 
 # RealWorld API Spec
 
-## Heroku Link
-[You can test the API here](https://node-express-conduit.herokuapp.com)
-
 ## Google Cloud Platform Link
 [You can test the API here](https://node-express-conduit.appspot.com)
 
